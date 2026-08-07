@@ -27,7 +27,8 @@ class Place:
         self.entrance: Place | None = None
         # Phase 1: Add an entrance to the exit
         # BEGIN Problem 2
-        "*** YOUR CODE HERE ***"
+        if self.exit is not None:
+            self.exit.entrance = self
         # END Problem 2
 
     def add_insect(self, insect: Insect):
@@ -140,7 +141,9 @@ class Ant(Insect):
     def double(self):
         """Double this ants's damage, if it has not already been doubled."""
         # BEGIN Problem 12
-        "*** YOUR CODE HERE ***"
+        if not hasattr(self, 'damage_doubled') or not self.damage_doubled:
+            self.damage *= 2
+            self.damage_doubled = True
         # END Problem 12
 
 
@@ -338,7 +341,7 @@ class QueenAnt(ThrowerAnt):
     food_cost = 7
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 12
-    implemented = False   # Change to True to view in the GUI
+    implemented = True
     # END Problem 12
 
     def action(self, gamestate: GameState):
@@ -346,7 +349,16 @@ class QueenAnt(ThrowerAnt):
         in her tunnel.
         """
         # BEGIN Problem 12
-        "*** YOUR CODE HERE ***"
+        ThrowerAnt.action(self, gamestate)
+        if self.place is None:
+            return
+        current = self.place.exit
+        while current is not None:
+            if current.ant is not None:
+                current.ant.double()
+                if hasattr(current.ant, 'ant_contained') and current.ant.ant_contained is not None:
+                    current.ant.ant_contained.double()
+            current = current.exit
         # END Problem 12
 
     def reduce_health(self, damage_taken: float):
@@ -354,7 +366,9 @@ class QueenAnt(ThrowerAnt):
         remaining, signal the end of the game.
         """
         # BEGIN Problem 12
-        "*** YOUR CODE HERE ***"
+        super().reduce_health(damage_taken)
+        if self.health <= 0:
+            raise AntsLoseException()
         # END Problem 12
 
 
