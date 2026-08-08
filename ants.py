@@ -152,6 +152,7 @@ class HarvesterAnt(Ant):
 
     name = 'Harvester'
     implemented = True
+    food_cost = 2
     # OVERRIDE CLASS ATTRIBUTES HERE
 
     def action(self, gamestate: GameState):
@@ -160,7 +161,7 @@ class HarvesterAnt(Ant):
         gamestate -- The GameState, used to access game state information.
         """
         # BEGIN Problem 1
-        "*** YOUR CODE HERE ***"
+        gamestate.food += 1
         # END Problem 1
 
 
@@ -170,6 +171,9 @@ class ThrowerAnt(Ant):
     name = 'Thrower'
     implemented = True
     damage = 1
+    food_cost = 3
+    lower_bound = float('-inf')
+    upper_bound = float('inf')
     # ADD/OVERRIDE CLASS ATTRIBUTES HERE
 
     def nearest_bee(self) -> Bee | None:
@@ -181,7 +185,14 @@ D
         if not self.place:
             return None  # An Ant that is not in a Place has no nearest Bee
         # BEGIN Problem 3 and 4
-        return random_bee(self.place.bees) # REPLACE THIS LINE
+        place = self.place
+        distance = 0
+        while place is not None and not place.is_hive:
+            if self.lower_bound <= distance <= self.upper_bound and place.bees:
+                return random_bee(place.bees)
+            place = place.entrance
+            distance += 1
+        return None
         # END Problem 3 and 4
 
     def throw_at(self, target: Bee | None):
@@ -211,9 +222,10 @@ class ShortThrower(ThrowerAnt):
 
     name = 'Short'
     food_cost = 2
+    upper_bound = 3
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 4
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem 4
 
 
@@ -222,9 +234,10 @@ class LongThrower(ThrowerAnt):
 
     name = 'Long'
     food_cost = 2
+    lower_bound = 5
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 4
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem 4
 
 
