@@ -249,7 +249,7 @@ class FireAnt(Ant):
     food_cost = 5
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 5
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem 5
 
     def __init__(self, health: int = 3):
@@ -264,15 +264,61 @@ class FireAnt(Ant):
         the additional damage if the fire ant dies.
         """
         # BEGIN Problem 5
-        "*** YOUR CODE HERE ***"
+        place = self.place
+        # The FireAnt scorches every Bee in its place by the damage it took.
+        if place is not None:
+            for bee in place.bees[:]:
+                bee.reduce_health(damage_taken)
+        # Determine if this blow will kill the FireAnt (before health is reduced).
+        will_die = self.health - damage_taken <= 0
+        super().reduce_health(damage_taken)
+        # If the FireAnt dies, it deals its full damage to all remaining Bees.
+        if will_die and place is not None:
+            for bee in place.bees[:]:
+                bee.reduce_health(self.damage)
         # END Problem 5
 
 # BEGIN Problem 6
-# The WallAnt class
+class WallAnt(Ant):
+    """WallAnt is an Ant with a large amount of health that does nothing each turn."""
+
+    name = 'Wall'
+    food_cost = 4
+    implemented = True
+
+    def __init__(self):
+        """Create a WallAnt with 4 health."""
+        super().__init__(4)
 # END Problem 6
 
 # BEGIN Problem 7
-# The HungryAnt Class
+class HungryAnt(Ant):
+    """HungryAnt takes a single 'chew' action each turn, eating a random Bee in
+    its place and then spending chew_cooldown turns digesting before it can eat
+    again.
+    """
+
+    name = 'Hungry'
+    food_cost = 4
+    chew_cooldown = 3
+    implemented = True
+
+    def __init__(self):
+        """Create a HungryAnt with 1 health that is ready to eat."""
+        super().__init__(1)
+        self.cooldown = 0
+
+    def action(self, gamestate: GameState):
+        """If not chewing, eat a random Bee in the same Place (reducing its health
+        to 0) and begin digesting for chew_cooldown turns. Otherwise, digest.
+        """
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        else:
+            bee = random_bee(self.place.bees)
+            if bee is not None:
+                bee.reduce_health(bee.health)
+                self.cooldown = self.chew_cooldown
 # END Problem 7
 
 
