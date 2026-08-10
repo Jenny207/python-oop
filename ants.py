@@ -125,7 +125,15 @@ class Ant(Insect):
             place.ant = self
         else:
             # BEGIN Problem 8b
-            assert place.ant is None, 'Too many ants in {0}'.format(place)
+            if place.ant.can_contain(self):
+                # Existing ant is a container that can hold this ant
+                place.ant.store_ant(self)
+            elif self.is_container and self.can_contain(place.ant):
+                # This new ant is a container; swap it in and store the existing ant
+                self.store_ant(place.ant)
+                place.ant = self
+            else:
+                assert place.ant is None, 'Too many ants in {0}'.format(place)
             # END Problem 8b
         Insect.add_to(self, place)
 
@@ -334,12 +342,12 @@ class ContainerAnt(Ant):
 
     def can_contain(self, other: Ant) -> bool:
         # BEGIN Problem 8a
-        "*** YOUR CODE HERE ***"
+        return self.ant_contained is None and not other.is_container
         # END Problem 8a
 
     def store_ant(self, ant: Ant):
         # BEGIN Problem 8a
-        "*** YOUR CODE HERE ***"
+        self.ant_contained = ant
         # END Problem 8a
 
     def remove_ant(self, ant: Ant):
@@ -359,7 +367,8 @@ class ContainerAnt(Ant):
 
     def action(self, gamestate: GameState):
         # BEGIN Problem 8a
-        "*** YOUR CODE HERE ***"
+        if self.ant_contained is not None:
+            self.ant_contained.action(gamestate)
         # END Problem 8a
 
 
@@ -370,11 +379,32 @@ class ProtectorAnt(ContainerAnt):
     food_cost = 4
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 8c
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
+
+    def __init__(self):
+        """Create a ProtectorAnt with 2 health."""
+        super().__init__(2)
     # END Problem 8c
 
 # BEGIN Problem 9
-# The TankAnt class
+class TankAnt(ContainerAnt):
+    """TankAnt is a ContainerAnt that also damages all Bees in its place each turn."""
+
+    name = 'Tank'
+    food_cost = 6
+    damage = 1
+    implemented = True
+
+    def __init__(self):
+        """Create a TankAnt with 2 health."""
+        super().__init__(2)
+
+    def action(self, gamestate: GameState):
+        """Damage all Bees in this place, then perform the contained ant's action."""
+        if self.place is not None:
+            for bee in self.place.bees[:]:
+                bee.reduce_health(self.damage)
+        super().action(gamestate)
 # END Problem 9
 
 
