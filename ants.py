@@ -107,6 +107,7 @@ class Ant(Insect):
     implemented = False  # Only implemented Ant classes should be instantiated
     food_cost = 0
     is_container = False
+    damage_doubled = False
     # ADD CLASS ATTRIBUTES HERE
 
     def __init__(self, health: int = 1):
@@ -127,10 +128,8 @@ class Ant(Insect):
         else:
             # BEGIN Problem 8b
             if place.ant.can_contain(self):
-                # Existing ant is a container that can hold this ant
                 place.ant.store_ant(self)
-            elif self.is_container and self.can_contain(place.ant):
-                # This new ant is a container; swap it in and store the existing ant
+            elif self.can_contain(place.ant):
                 self.store_ant(place.ant)
                 place.ant = self
             else:
@@ -150,7 +149,7 @@ class Ant(Insect):
     def double(self):
         """Double this ants's damage, if it has not already been doubled."""
         # BEGIN Problem 12
-        if not hasattr(self, 'damage_doubled') or not self.damage_doubled:
+        if not self.damage_doubled:
             self.damage *= 2
             self.damage_doubled = True
         # END Problem 12
@@ -454,7 +453,7 @@ class QueenAnt(ThrowerAnt):
         while current is not None:
             if current.ant is not None:
                 current.ant.double()
-                if hasattr(current.ant, 'ant_contained') and current.ant.ant_contained is not None:
+                if current.ant.is_container and current.ant.ant_contained is not None:
                     current.ant.ant_contained.double()
             current = current.exit
         # END Problem 12
